@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policies - AegisCore Security Framework</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">AegisCore</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="policies.html" class="nav-link active">Policies</a></li>
+                <li><a href="download.html" class="nav-link">Download</a></li>
+                <li><a href="legal.html" class="nav-link">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Security Policies & Restrictions</h1>
+                <p>Understanding the difference between system restrictions and configurable policies</p>
+            </div>
+        </section>
+
+        <section class="comparison">
+            <div class="container">
+                <div class="comparison-grid">
+                    <div class="comparison-card restrictions-card fade-in">
+                        <div class="card-header">
+                            <h2>🧱 Restrictions</h2>
+                            <p>Hard-coded security blocks that cannot be disabled</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="restriction-item">
+                                <div class="item-icon">🔌</div>
+                                <div class="item-content">
+                                    <h3>USB Data Blocking</h3>
+                                    <p>Prevents all data transfer via USB ports while maintaining charging capabilities. This restriction blocks malicious USB devices from exfiltrating data or injecting malware.</p>
+                                </div>
+                            </div>
+                            <div class="restriction-item">
+                                <div class="item-icon">📜</div>
+                                <div class="item-content">
+                                    <h3>Script Execution Blocking</h3>
+                                    <p>Blocks unauthorized script execution including PowerShell, batch files, and other scripting engines to prevent code injection and privilege escalation attacks.</p>
+                                </div>
+                            </div>
+                            <div class="restriction-item">
+                                <div class="item-icon">⚙️</div>
+                                <div class="item-content">
+                                    <h3>Unauthorized Process Blocking</h3>
+                                    <p>Prevents execution of unknown or unsigned executables, stopping malware and unauthorized applications from running on the system.</p>
+                                </div>
+                            </div>
+                            <div class="restriction-item">
+                                <div class="item-icon">🌐</div>
+                                <div class="item-content">
+                                    <h3>Network Exfiltration Blocking</h3>
+                                    <p>Stops data from leaving the network through unauthorized channels, protecting sensitive information from external threats.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="comparison-card policies-card fade-in">
+                        <div class="card-header">
+                            <h2>📜 Policies</h2>
+                            <p>Configurable security rules that can be customized</p>
+                        </div>
+                        <div class="card-content">
+                            <div class="policy-item">
+                                <div class="item-icon">⚡</div>
+                                <div class="item-content">
+                                    <h3>USB Charge-only Mode</h3>
+                                    <p>Configurable policy that allows USB devices to charge only, with optional whitelist exceptions for specific trusted devices.</p>
+                                </div>
+                            </div>
+                            <div class="policy-item">
+                                <div class="item-icon">✅</div>
+                                <div class="item-content">
+                                    <h3>USB Whitelist</h3>
+                                    <p>Create approved lists of USB devices that can bypass restrictions based on device ID, manufacturer, or specific hardware identifiers.</p>
+                                </div>
+                            </div>
+                            <div class="policy-item">
+                                <div class="item-icon">🌍</div>
+                                <div class="item-content">
+                                    <h3>Internet Whitelist</h3>
+                                    <p>Define allowed domains and IP addresses that can be accessed, blocking all other network connections to prevent data exfiltration.</p>
+                                </div>
+                            </div>
+                            <div class="policy-item">
+                                <div class="item-icon">🔐</div>
+                                <div class="item-content">
+                                    <h3>Session-based Trust Lock</h3>
+                                    <p>Implement time-based or user-session trust levels that automatically adjust security restrictions based on current context.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="security-modes">
+            <div class="container">
+                <h2 class="section-title">Security Modes</h2>
+                <div class="modes-grid">
+                    <div class="mode-card fade-in">
+                        <div class="mode-header">
+                            <h3>SAFE</h3>
+                            <span class="mode-level">Basic Protection</span>
+                        </div>
+                        <div class="mode-features">
+                            <ul>
+                                <li>Essential restrictions enabled</li>
+                                <li>Minimal policy configuration</li>
+                                <li>Low system impact</li>
+                                <li>Suitable for personal use</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mode-card fade-in">
+                        <div class="mode-header">
+                            <h3>STANDARD</h3>
+                            <span class="mode-level">Balanced Security</span>
+                        </div>
+                        <div class="mode-features">
+                            <ul>
+                                <li>All restrictions active</li>
+                                <li>Basic policy configuration</li>
+                                <li>Moderate system impact</li>
+                                <li>Ideal for small businesses</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mode-card fade-in">
+                        <div class="mode-header">
+                            <h3>ENTERPRISE</h3>
+                            <span class="mode-level">Advanced Controls</span>
+                        </div>
+                        <div class="mode-features">
+                            <ul>
+                                <li>Comprehensive restrictions</li>
+                                <li>Full policy customization</li>
+                                <li>Advanced monitoring</li>
+                                <li>Corporate environment ready</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="mode-card fade-in">
+                        <div class="mode-header">
+                            <h3>LOCKDOWN</h3>
+                            <span class="mode-level">Maximum Security</span>
+                        </div>
+                        <div class="mode-features">
+                            <ul>
+                                <li>Strictest enforcement</li>
+                                <li>Minimal exceptions</li>
+                                <li>High system impact</li>
+                                <li>Critical infrastructure only</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="implementation">
+            <div class="container">
+                <h2 class="section-title">Implementation Philosophy</h2>
+                <div class="implementation-content">
+                    <div class="philosophy-text">
+                        <p>
+                            AegisCore's architecture separates <strong>restrictions</strong> (immutable security blocks) from 
+                            <strong>policies</strong> (configurable rules) to provide both robust protection and flexibility.
+                        </p>
+                        <p>
+                            This separation ensures that critical security measures cannot be accidentally disabled while 
+                            allowing administrators to customize the framework to their specific operational requirements.
+                        </p>
+                        <div class="key-principles">
+                            <h3>Key Principles</h3>
+                            <ul>
+                                <li><strong>Security by Default:</strong> All restrictions are enabled by default</li>
+                                <li><strong>Granular Control:</strong> Policies provide fine-tuned customization</li>
+                                <li><strong>Fail-safe Design:</strong> System remains secure even if policies are misconfigured</li>
+                                <li><strong>Transparency:</strong> Clear distinction between what can and cannot be changed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AegisCore Security Framework. Research & Educational Use.</p>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+</body>
+</html>
