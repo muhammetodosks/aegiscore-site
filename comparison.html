@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Mode Comparison - AegisCore Security Framework</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Comparison Tool Specific Styles */
+        .comparison-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .comparison-tool {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .mode-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mode-btn:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: rgba(0, 212, 255, 0.5);
+            color: #00d4ff;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-color: #00d4ff;
+            color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .mode-btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-category {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            transition: color 0.3s ease;
+        }
+
+        .feature-item:hover {
+            color: #ffffff;
+        }
+
+        .feature-item:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-details {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .mode-column {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .mode-column.highlighted {
+            border-color: #00d4ff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.2);
+            transform: scale(1.02);
+        }
+
+        .mode-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mode-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .mode-description {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-bottom: 1rem;
+        }
+
+        .mode-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .feature-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .feature-status.enabled {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .feature-status.limited {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .feature-status.disabled {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .feature-status.configurable {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .status-icon {
+            margin-right: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .recommendation-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .recommendation-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .recommendation-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .recommendation-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .recommendation-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .recommendation-mode {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-description {
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .recommendation-features {
+            list-style: none;
+            text-align: left;
+        }
+
+        .recommendation-features li {
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .recommendation-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+        }
+
+        .comparison-summary {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 255, 136, 0.1));
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .summary-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-category {
+                position: static;
+            }
+            
+            .comparison-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .comparison-details {
+                grid-template-columns: 1fr;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .mode-btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">AegisCore</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="policies.html" class="nav-link">Policies</a></li>
+                <li><a href="download.html" class="nav-link">Download</a></li>
+                <li><a href="comparison.html" class="nav-link active">Compare</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="legal.html" class="nav-link">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="comparison-container">
+                <h1>Security Mode Comparison</h1>
+                <p>Compare and choose the right security mode for your needs</p>
+            </div>
+        </section>
+
+        <section class="comparison-tool-section">
+            <div class="comparison-container">
+                <div class="comparison-tool fade-in">
+                    <div class="mode-selector">
+                        <button class="mode-btn active" data-mode="safe">SAFE</button>
+                        <button class="mode-btn" data-mode="standard">STANDARD</button>
+                        <button class="mode-btn" data-mode="enterprise">ENTERPRISE</button>
+                        <button class="mode-btn" data-mode="lockdown">LOCKDOWN</button>
+                    </div>
+
+                    <div class="comparison-grid">
+                        <div class="feature-category">
+                            <h3 class="category-title">Security Features</h3>
+                            <ul class="feature-list">
+                                <li class="feature-item">USB Data Blocking</li>
+                                <li class="feature-item">Script Execution Control</li>
+                                <li class="feature-item">Process Monitoring</li>
+                                <li class="feature-item">Network Filtering</li>
+                                <li class="feature-item">File Encryption</li>
+                                <li class="feature-item">Real-time Protection</li>
+                                <li class="feature-item">Policy Configuration</li>
+                                <li class="feature-item">Audit Logging</li>
+                                <li class="feature-item">System Performance Impact</li>
+                                <li class="feature-item">User Experience</li>
+                            </ul>
+                        </div>
+
+                        <div class="comparison-details" id="comparisonDetails">
+                            <!-- Dynamic content will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="recommendation-section">
+            <div class="comparison-container">
+                <h2 class="recommendation-title">Recommended Use Cases</h2>
+                <div class="recommendation-cards">
+                    <div class="recommendation-card fade-in" data-recommendation="personal">
+                        <span class="recommendation-icon">👤</span>
+                        <h3 class="recommendation-mode">Personal Use</h3>
+                        <p class="recommendation-description">
+                            For individual users who need basic protection without compromising system performance.
+                        </p>
+                        <ul class="recommendation-features">
+                            <li>Essential security features</li>
+                            <li>Low system impact</li>
+                            <li>Easy to configure</li>
+                            <li>Minimal user interaction</li>
+                        </ul>
+                    </div>
+
+                    <div class="recommendation-card fade-in" data-recommendation="business">
+                        <span class="recommendation-icon">🏢</span>
+                        <h3 class="recommendation-mode">Small Business</h3>
+                        <p class="recommendation-description">
+                            Perfect for small businesses requiring balanced security and operational flexibility.
+                        </p>
+                        <ul class="recommendation-features">
+                            <li>Comprehensive protection</li>
+                            <li>Configurable policies</li>
+                            <li>Centralized management</li>
+                            <li>Cost-effective solution</li>
+                        </ul>
+                    </div>
+
+                    <div class="recommendation-card fade-in" data-recommendation="enterprise">
+                        <span class="recommendation-icon">🏛️</span>
+                        <h3 class="recommendation-mode">Enterprise</h3>
+                        <p class="recommendation-description">
+                            Advanced security for large organizations with complex requirements and high-value assets.
+                        </p>
+                        <ul class="recommendation-features">
+                            <li>Maximum security controls</li>
+                            <li>Advanced threat detection</li>
+                            <li>Compliance support</li>
+                            <li>24/7 monitoring</li>
+                        </ul>
+                    </div>
+
+                    <div class="recommendation-card fade-in" data-recommendation="critical">
+                        <span class="recommendation-icon">🔒</span>
+                        <h3 class="recommendation-mode">Critical Infrastructure</h3>
+                        <p class="recommendation-description">
+                            Maximum security for systems where any breach could have catastrophic consequences.
+                        </p>
+                        <ul class="recommendation-features">
+                            <li>Zero-trust architecture</li>
+                            <li>Air-gapped security</li>
+                            <li>Strict access controls</li>
+                            <li>Complete isolation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="comparison-summary">
+            <div class="comparison-container">
+                <h2 class="summary-title">Quick Comparison Summary</h2>
+                <div class="summary-grid">
+                    <div class="summary-item fade-in">
+                        <div class="summary-value">4</div>
+                        <div class="summary-label">Security Modes</div>
+                    </div>
+                    <div class="summary-item fade-in">
+                        <div class="summary-value">10+</div>
+                        <div class="summary-label">Security Features</div>
+                    </div>
+                    <div class="summary-item fade-in">
+                        <div class="summary-value">100%</div>
+                        <div class="summary-label">Customizable</div>
+                    </div>
+                    <div class="summary-item fade-in">
+                        <div class="summary-value">24/7</div>
+                        <div class="summary-label">Protection</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AegisCore Security Framework. Research & Educational Use.</p>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+    <script>
+        // Comparison Tool JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            initComparisonTool();
+        });
+
+        const modeData = {
+            safe: {
+                name: 'SAFE',
+                description: 'Basic protection for everyday use',
+                badge: 'Entry Level',
+                features: {
+                    'USB Data Blocking': 'limited',
+                    'Script Execution Control': 'limited',
+                    'Process Monitoring': 'enabled',
+                    'Network Filtering': 'limited',
+                    'File Encryption': 'disabled',
+                    'Real-time Protection': 'enabled',
+                    'Policy Configuration': 'configurable',
+                    'Audit Logging': 'limited',
+                    'System Performance Impact': 'Low',
+                    'User Experience': 'Excellent'
+                }
+            },
+            standard: {
+                name: 'STANDARD',
+                description: 'Balanced security for most users',
+                badge: 'Recommended',
+                features: {
+                    'USB Data Blocking': 'enabled',
+                    'Script Execution Control': 'enabled',
+                    'Process Monitoring': 'enabled',
+                    'Network Filtering': 'enabled',
+                    'File Encryption': 'limited',
+                    'Real-time Protection': 'enabled',
+                    'Policy Configuration': 'configurable',
+                    'Audit Logging': 'enabled',
+                    'System Performance Impact': 'Medium',
+                    'User Experience': 'Good'
+                }
+            },
+            enterprise: {
+                name: 'ENTERPRISE',
+                description: 'Advanced controls for organizations',
+                badge: 'Professional',
+                features: {
+                    'USB Data Blocking': 'enabled',
+                    'Script Execution Control': 'enabled',
+                    'Process Monitoring': 'enabled',
+                    'Network Filtering': 'enabled',
+                    'File Encryption': 'enabled',
+                    'Real-time Protection': 'enabled',
+                    'Policy Configuration': 'configurable',
+                    'Audit Logging': 'enabled',
+                    'System Performance Impact': 'High',
+                    'User Experience': 'Fair'
+                }
+            },
+            lockdown: {
+                name: 'LOCKDOWN',
+                description: 'Maximum security for critical systems',
+                badge: 'Maximum',
+                features: {
+                    'USB Data Blocking': 'enabled',
+                    'Script Execution Control': 'enabled',
+                    'Process Monitoring': 'enabled',
+                    'Network Filtering': 'enabled',
+                    'File Encryption': 'enabled',
+                    'Real-time Protection': 'enabled',
+                    'Policy Configuration': 'limited',
+                    'Audit Logging': 'enabled',
+                    'System Performance Impact': 'Very High',
+                    'User Experience': 'Limited'
+                }
+            }
+        };
+
+        function initComparisonTool() {
+            const modeButtons = document.querySelectorAll('.mode-btn');
+            const comparisonDetails = document.getElementById('comparisonDetails');
+            const recommendationCards = document.querySelectorAll('.recommendation-card');
+
+            // Initialize with SAFE mode
+            updateComparison('safe');
+
+            // Add click handlers to mode buttons
+            modeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    modeButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Update comparison
+                    const mode = this.getAttribute('data-mode');
+                    updateComparison(mode);
+                });
+            });
+
+            // Add click handlers to recommendation cards
+            recommendationCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const recommendation = this.getAttribute('data-recommendation');
+                    let targetMode;
+                    
+                    switch(recommendation) {
+                        case 'personal':
+                            targetMode = 'safe';
+                            break;
+                        case 'business':
+                            targetMode = 'standard';
+                            break;
+                        case 'enterprise':
+                            targetMode = 'enterprise';
+                            break;
+                        case 'critical':
+                            targetMode = 'lockdown';
+                            break;
+                    }
+                    
+                    // Update active button and comparison
+                    modeButtons.forEach(btn => btn.classList.remove('active'));
+                    document.querySelector(`[data-mode="${targetMode}"]`).classList.add('active');
+                    updateComparison(targetMode);
+                    
+                    // Scroll to comparison tool
+                    document.querySelector('.comparison-tool').scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                });
+            });
+        }
+
+        function updateComparison(mode) {
+            const comparisonDetails = document.getElementById('comparisonDetails');
+            const data = modeData[mode];
+            
+            // Clear existing content
+            comparisonDetails.innerHTML = '';
+            
+            // Create comparison columns for all modes
+            Object.keys(modeData).forEach((key, index) => {
+                const modeInfo = modeData[key];
+                const isHighlighted = key === mode;
+                
+                const column = document.createElement('div');
+                column.className = `mode-column fade-in ${isHighlighted ? 'highlighted' : ''}`;
+                column.style.animationDelay = `${index * 100}ms`;
+                
+                column.innerHTML = `
+                    <div class="mode-header">
+                        <h3 class="mode-name">${modeInfo.name}</h3>
+                        <p class="mode-description">${modeInfo.description}</p>
+                        <span class="mode-badge">${modeInfo.badge}</span>
+                    </div>
+                    <div class="feature-list">
+                        ${Object.entries(modeInfo.features).map(([feature, status]) => `
+                            <div class="feature-status ${status}">
+                                <span class="status-icon">${getStatusIcon(status)}</span>
+                                ${formatStatusText(status)}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                comparisonDetails.appendChild(column);
+            });
+        }
+
+        function getStatusIcon(status) {
+            switch(status) {
+                case 'enabled':
+                    return '✓';
+                case 'limited':
+                    return '⚡';
+                case 'disabled':
+                    return '✗';
+                case 'configurable':
+                    return '⚙️';
+                case 'Low':
+                case 'Medium':
+                case 'High':
+                case 'Very High':
+                    return getStatusLevelIcon(status);
+                case 'Excellent':
+                case 'Good':
+                case 'Fair':
+                case 'Limited':
+                    return getExperienceIcon(status);
+                default:
+                    return '•';
+            }
+        }
+
+        function getStatusLevelIcon(level) {
+            switch(level) {
+                case 'Low': return '🟢';
+                case 'Medium': return '🟡';
+                case 'High': return '🟠';
+                case 'Very High': return '🔴';
+                default: return '•';
+            }
+        }
+
+        function getExperienceIcon(experience) {
+            switch(experience) {
+                case 'Excellent': return '⭐⭐⭐⭐⭐';
+                case 'Good': return '⭐⭐⭐⭐';
+                case 'Fair': return '⭐⭐⭐';
+                case 'Limited': return '⭐⭐';
+                default: return '⭐';
+            }
+        }
+
+        function formatStatusText(status) {
+            // For performance impact and user experience, return the status as-is
+            if (['Low', 'Medium', 'High', 'Very High', 'Excellent', 'Good', 'Fair', 'Limited'].includes(status)) {
+                return status;
+            }
+            
+            // For other features, return descriptive text
+            switch(status) {
+                case 'enabled':
+                    return 'Fully Enabled';
+                case 'limited':
+                    return 'Limited Access';
+                case 'disabled':
+                    return 'Disabled';
+                case 'configurable':
+                    return 'Configurable';
+                default:
+                    return status;
+            }
+        }
+    </script>
+</body>
+</html>

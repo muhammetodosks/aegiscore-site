@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Checklist - AegisCore Security Framework</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Checklist Specific Styles */
+        .checklist-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .wizard-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .wizard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .wizard-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .wizard-description {
+            color: #b0b0b0;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .wizard-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .wizard-progress::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            z-index: 1;
+            transition: width 0.3s ease;
+        }
+
+        .progress-step {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: 600;
+            color: #b0b0b0;
+            transition: all 0.3s ease;
+        }
+
+        .progress-step.active .step-circle {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-color: #00d4ff;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .progress-step.completed .step-circle {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border-color: #00ff88;
+            color: #ffffff;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            transition: color 0.3s ease;
+        }
+
+        .progress-step.active .step-label,
+        .progress-step.completed .step-label {
+            color: #ffffff;
+        }
+
+        .wizard-content {
+            min-height: 400px;
+        }
+
+        .wizard-step {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .wizard-step.active {
+            display: block;
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 2rem;
+        }
+
+        .checklist-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checklist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .checklist-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .checklist-item.checked {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+        }
+
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item.checked .checkbox {
+            background: #00ff88;
+            border-color: #00ff88;
+        }
+
+        .checklist-item.checked .checkbox::after {
+            content: '✓';
+            color: #0a0a0a;
+            font-weight: 600;
+        }
+
+        .checklist-content {
+            flex: 1;
+        }
+
+        .checklist-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .checklist-description {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            line-height: 1.4;
+        }
+
+        .configuration-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .config-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .config-option:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .config-option.selected {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .config-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .config-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .config-description {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            line-height: 1.4;
+        }
+
+        .wizard-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-button.prev {
+            background: rgba(255, 255, 255, 0.1);
+            color: #b0b0b0;
+        }
+
+        .nav-button.prev:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .nav-button.next {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #ffffff;
+        }
+
+        .nav-button.next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .summary-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .summary-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .summary-card h3 {
+            font-size: 1.2rem;
+            color: #00d4ff;
+            margin-bottom: 1rem;
+        }
+
+        .summary-list {
+            list-style: none;
+        }
+
+        .summary-list li {
+            color: #b0b0b0;
+            margin-bottom: 0.5rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .summary-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .export-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            border-radius: 8px;
+            color: #0a0a0a;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .wizard-progress {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .wizard-progress::before {
+                display: none;
+            }
+            
+            .progress-line {
+                display: none;
+            }
+            
+            .wizard-navigation {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .nav-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">AegisCore</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="policies.html" class="nav-link">Policies</a></li>
+                <li><a href="download.html" class="nav-link">Download</a></li>
+                <li><a href="checklist.html" class="nav-link active">Checklist</a></li>
+                <li><a href="demo.html" class="nav-link">Demo</a></li>
+                <li><a href="comparison.html" class="nav-link">Compare</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="legal.html" class="nav-link">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="checklist-container">
+                <h1>Security Configuration Wizard</h1>
+                <p>Step-by-step guide to configure your AegisCore security setup</p>
+            </div>
+        </section>
+
+        <section class="wizard-section">
+            <div class="checklist-container">
+                <div class="wizard-container fade-in">
+                    <div class="wizard-header">
+                        <h2 class="wizard-title">Configuration Wizard</h2>
+                        <p class="wizard-description">
+                            Follow this interactive wizard to configure your AegisCore security framework according to your specific needs.
+                        </p>
+                    </div>
+
+                    <div class="wizard-progress">
+                        <div class="progress-line" id="progressLine" style="width: 25%;"></div>
+                        <div class="progress-step active" data-step="1">
+                            <div class="step-circle">1</div>
+                            <div class="step-label">Assessment</div>
+                        </div>
+                        <div class="progress-step" data-step="2">
+                            <div class="step-circle">2</div>
+                            <div class="step-label">Security Mode</div>
+                        </div>
+                        <div class="progress-step" data-step="3">
+                            <div class="step-circle">3</div>
+                            <div class="step-label">Policies</div>
+                        </div>
+                        <div class="progress-step" data-step="4">
+                            <div class="step-circle">4</div>
+                            <div class="step-label">Summary</div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-content">
+                        <!-- Step 1: Security Assessment -->
+                        <div class="wizard-step active" id="step1">
+                            <h3 class="step-title">Security Assessment</h3>
+                            <p style="color: #b0b0b0; margin-bottom: 2rem;">
+                                Evaluate your current security posture and identify areas that need protection.
+                            </p>
+
+                            <div class="checklist-section">
+                                <h4 class="section-title">🔍 System Evaluation</h4>
+                                <div class="checklist-grid">
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Data Classification</div>
+                                            <div class="checklist-description">Identify and classify sensitive data types</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Access Control Review</div>
+                                            <div class="checklist-description">Review current user access permissions</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Network Assessment</div>
+                                            <div class="checklist-description">Analyze network traffic and connections</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Compliance Requirements</div>
+                                            <div class="checklist-description">Identify regulatory compliance needs</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Risk Assessment</div>
+                                            <div class="checklist-description">Evaluate potential security risks</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Current Security Measures</div>
+                                            <div class="checklist-description">Document existing security controls</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="checklist-section">
+                                <h4 class="section-title">🎯 Environment Analysis</h4>
+                                <div class="checklist-grid">
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">User Environment</div>
+                                            <div class="checklist-description">Assess user work patterns and needs</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Device Inventory</div>
+                                            <div class="checklist-description">Catalog all connected devices</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Application Usage</div>
+                                            <div class="checklist-description">Identify critical applications</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Security Mode Selection -->
+                        <div class="wizard-step" id="step2">
+                            <h3 class="step-title">Select Security Mode</h3>
+                            <p style="color: #b0b0b0; margin-bottom: 2rem;">
+                                Choose the security mode that best fits your organization's needs.
+                            </p>
+
+                            <div class="configuration-options">
+                                <div class="config-option" onclick="selectConfigOption(this, 'safe')">
+                                    <span class="config-icon">🛡️</span>
+                                    <h4 class="config-title">SAFE Mode</h4>
+                                    <p class="config-description">
+                                        Basic protection for personal use with minimal system impact
+                                    </p>
+                                </div>
+                                <div class="config-option" onclick="selectConfigOption(this, 'standard')">
+                                    <span class="config-icon">⚖️</span>
+                                    <h4 class="config-title">STANDARD Mode</h4>
+                                    <p class="config-description">
+                                        Balanced security for small to medium businesses
+                                    </p>
+                                </div>
+                                <div class="config-option" onclick="selectConfigOption(this, 'enterprise')">
+                                    <span class="config-icon">🏢</span>
+                                    <h4 class="config-title">ENTERPRISE Mode</h4>
+                                    <p class="config-description">
+                                        Advanced controls for large organizations
+                                    </p>
+                                </div>
+                                <div class="config-option" onclick="selectConfigOption(this, 'lockdown')">
+                                    <span class="config-icon">🔒</span>
+                                    <h4 class="config-title">LOCKDOWN Mode</h4>
+                                    <p class="config-description">
+                                        Maximum security for critical infrastructure
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Policy Configuration -->
+                        <div class="wizard-step" id="step3">
+                            <h3 class="step-title">Configure Security Policies</h3>
+                            <p style="color: #b0b0b0; margin-bottom: 2rem;">
+                                Customize security policies based on your selected mode and requirements.
+                            </p>
+
+                            <div class="checklist-section">
+                                <h4 class="section-title">🔧 Core Policies</h4>
+                                <div class="checklist-grid">
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">USB Device Control</div>
+                                            <div class="checklist-description">Manage USB device access and permissions</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Script Execution Policy</div>
+                                            <div class="checklist-description">Control PowerShell and batch script execution</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Network Filtering</div>
+                                            <div class="checklist-description">Implement network traffic filtering rules</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Process Monitoring</div>
+                                            <div class="checklist-description">Monitor and control process execution</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="checklist-section">
+                                <h4 class="section-title">📋 Advanced Policies</h4>
+                                <div class="checklist-grid">
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">File Encryption</div>
+                                            <div class="checklist-description">Encrypt sensitive files and folders</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Audit Logging</div>
+                                            <div class="checklist-description">Enable comprehensive security logging</div>
+                                        </div>
+                                    </div>
+                                    <div class="checklist-item" onclick="toggleChecklistItem(this)">
+                                        <div class="checkbox"></div>
+                                        <div class="checklist-content">
+                                            <div class="checklist-title">Real-time Monitoring</div>
+                                            <div class="checklist-description">Activate real-time threat detection</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Summary -->
+                        <div class="wizard-step" id="step4">
+                            <h3 class="step-title">Configuration Summary</h3>
+                            <p style="color: #b0b0b0; margin-bottom: 2rem;">
+                                Review your configuration choices and generate your security setup.
+                            </p>
+
+                            <div class="summary-grid">
+                                <div class="summary-card">
+                                    <h3>📊 Assessment Results</h3>
+                                    <ul class="summary-list" id="assessmentSummary">
+                                        <li>Security evaluation completed</li>
+                                        <li>Risk assessment documented</li>
+                                        <li>Compliance requirements identified</li>
+                                    </ul>
+                                </div>
+                                <div class="summary-card">
+                                    <h3>🔒 Selected Security Mode</h3>
+                                    <ul class="summary-list" id="modeSummary">
+                                        <li>Mode: <span id="selectedMode">Not selected</span></li>
+                                        <li>Protection level configured</li>
+                                        <li>Performance impact assessed</li>
+                                    </ul>
+                                </div>
+                                <div class="summary-card">
+                                    <h3>⚙️ Configured Policies</h3>
+                                    <ul class="summary-list" id="policySummary">
+                                        <li>Core policies enabled</li>
+                                        <li>Advanced policies configured</li>
+                                        <li>Custom rules applied</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="export-buttons">
+                                <button class="export-button" onclick="exportConfiguration()">
+                                    📄 Export Configuration
+                                </button>
+                                <button class="export-button" onclick="generateReport()">
+                                    📊 Generate Report
+                                </button>
+                                <button class="export-button" onclick="saveProgress()">
+                                    💾 Save Progress
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wizard-navigation">
+                        <button class="nav-button prev" onclick="previousStep()" disabled>
+                            ← Previous
+                        </button>
+                        <button class="nav-button next" onclick="nextStep()">
+                            Next →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AegisCore Security Framework. Research & Educational Use.</p>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+    <script>
+        // Wizard JavaScript
+        let currentStep = 1;
+        const totalSteps = 4;
+        let selectedMode = '';
+        let wizardData = {
+            assessment: [],
+            policies: []
+        };
+
+        function toggleChecklistItem(element) {
+            element.classList.toggle('checked');
+            
+            // Update wizard data
+            const title = element.querySelector('.checklist-title').textContent;
+            const isChecked = element.classList.contains('checked');
+            
+            if (currentStep === 1) {
+                if (isChecked) {
+                    wizardData.assessment.push(title);
+                } else {
+                    wizardData.assessment = wizardData.assessment.filter(item => item !== title);
+                }
+            } else if (currentStep === 3) {
+                if (isChecked) {
+                    wizardData.policies.push(title);
+                } else {
+                    wizardData.policies = wizardData.policies.filter(item => item !== title);
+                }
+            }
+        }
+
+        function selectConfigOption(element, mode) {
+            // Remove selected class from all options
+            document.querySelectorAll('.config-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            selectedMode = mode;
+        }
+
+        function updateProgress() {
+            const progressLine = document.getElementById('progressLine');
+            const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            progressLine.style.width = progressPercentage + '%';
+            
+            // Update step indicators
+            document.querySelectorAll('.progress-step').forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                } else if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                }
+            });
+            
+            // Update navigation buttons
+            const prevButton = document.querySelector('.nav-button.prev');
+            const nextButton = document.querySelector('.nav-button.next');
+            
+            prevButton.disabled = currentStep === 1;
+            
+            if (currentStep === totalSteps) {
+                nextButton.textContent = 'Finish';
+                nextButton.onclick = finishWizard;
+            } else {
+                nextButton.textContent = 'Next →';
+                nextButton.onclick = nextStep;
+            }
+        }
+
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show current step
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+            
+            updateProgress();
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                // Validate current step
+                if (currentStep === 2 && !selectedMode) {
+                    alert('Please select a security mode before proceeding.');
+                    return;
+                }
+                
+                currentStep++;
+                showStep(currentStep);
+                
+                // Update summary if reaching final step
+                if (currentStep === 4) {
+                    updateSummary();
+                }
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function updateSummary() {
+            // Update assessment summary
+            const assessmentSummary = document.getElementById('assessmentSummary');
+            if (wizardData.assessment.length > 0) {
+                assessmentSummary.innerHTML = wizardData.assessment.map(item => `<li>${item}</li>`).join('');
+            }
+            
+            // Update mode summary
+            const selectedModeElement = document.getElementById('selectedMode');
+            if (selectedMode) {
+                selectedModeElement.textContent = selectedMode.toUpperCase();
+            }
+            
+            // Update policy summary
+            const policySummary = document.getElementById('policySummary');
+            if (wizardData.policies.length > 0) {
+                policySummary.innerHTML = wizardData.policies.map(item => `<li>${item}</li>`).join('');
+            }
+        }
+
+        function exportConfiguration() {
+            const config = {
+                mode: selectedMode,
+                assessment: wizardData.assessment,
+                policies: wizardData.policies,
+                timestamp: new Date().toISOString()
+            };
+            
+            const configText = JSON.stringify(config, null, 2);
+            const blob = new Blob([configText], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'aegiscore-configuration.json';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function generateReport() {
+            const reportContent = `
+AegisCore Security Configuration Report
+========================================
+
+Generated: ${new Date().toLocaleString()}
+
+Security Mode: ${selectedMode.toUpperCase() || 'Not selected'}
+
+Assessment Items:
+${wizardData.assessment.map(item => `- ${item}`).join('\n')}
+
+Configured Policies:
+${wizardData.policies.map(item => `- ${item}`).join('\n')}
+
+Recommendations:
+- Review configuration regularly
+- Monitor security logs
+- Update policies as needed
+- Conduct periodic security assessments
+
+========================================
+This report was generated by the AegisCore Configuration Wizard
+            `;
+            
+            const blob = new Blob([reportContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'aegiscore-security-report.txt';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function saveProgress() {
+            const progress = {
+                currentStep,
+                selectedMode,
+                wizardData,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('aegiscore-wizard-progress', JSON.stringify(progress));
+            alert('Progress saved successfully!');
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('aegiscore-wizard-progress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                currentStep = progress.currentStep || 1;
+                selectedMode = progress.selectedMode || '';
+                wizardData = progress.wizardData || { assessment: [], policies: [] };
+                
+                // Restore UI state
+                showStep(currentStep);
+                
+                // Restore checked items
+                if (wizardData.assessment.length > 0) {
+                    wizardData.assessment.forEach(title => {
+                        const item = Array.from(document.querySelectorAll('#step1 .checklist-title'))
+                            .find(el => el.textContent === title);
+                        if (item) {
+                            item.closest('.checklist-item').classList.add('checked');
+                        }
+                    });
+                }
+                
+                if (wizardData.policies.length > 0) {
+                    wizardData.policies.forEach(title => {
+                        const item = Array.from(document.querySelectorAll('#step3 .checklist-title'))
+                            .find(el => el.textContent === title);
+                        if (item) {
+                            item.closest('.checklist-item').classList.add('checked');
+                        }
+                    });
+                }
+                
+                // Restore selected mode
+                if (selectedMode) {
+                    const option = document.querySelector(`.config-option[onclick*="${selectedMode}"]`);
+                    if (option) {
+                        option.classList.add('selected');
+                    }
+                }
+            }
+        }
+
+        function finishWizard() {
+            alert('Configuration wizard completed! Your security setup is ready to deploy.');
+            // Optionally redirect to download page or dashboard
+            // window.location.href = 'download.html';
+        }
+
+        // Initialize wizard on load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProgress();
+            updateProgress();
+        });
+    </script>
+</body>
+</html>

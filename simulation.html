@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Threat Simulation - AegisCore Security Framework</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Simulation Specific Styles */
+        .simulation-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .simulation-hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a0a 100%);
+            padding: 80px 0;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .simulation-hero h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .simulation-hero p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .simulation-control-panel {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .control-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .simulation-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            color: #00ff88;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .threat-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .threat-button {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .threat-button:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .threat-button.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: #00d4ff;
+        }
+
+        .threat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .threat-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .threat-description {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            line-height: 1.4;
+        }
+
+        .simulation-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .attack-simulation {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .defense-simulation {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .simulation-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .simulation-viewport {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .system-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(0, 212, 255, 0.2);
+            border: 2px solid #00d4ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .system-node:hover {
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .system-node.compromised {
+            background: rgba(255, 71, 87, 0.2);
+            border-color: #ff4757;
+            animation: blink 1s infinite;
+        }
+
+        .system-node.protected {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: #00ff88;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .attack-vector {
+            position: absolute;
+            width: 4px;
+            background: linear-gradient(90deg, transparent, #ff4757, transparent);
+            transform-origin: left center;
+            animation: attack-move 2s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes attack-move {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .defense-shield {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid #00ff88;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: rgba(0, 255, 136, 0.1);
+            animation: shield-pulse 2s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shield-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 0.4; }
+        }
+
+        .event-log {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1.5rem;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry.attack {
+            border-left: 3px solid #ff4757;
+        }
+
+        .log-entry.defense {
+            border-left: 3px solid #00ff88;
+        }
+
+        .log-entry.info {
+            border-left: 3px solid #00d4ff;
+        }
+
+        .log-time {
+            color: #666;
+            font-size: 0.8rem;
+            min-width: 80px;
+        }
+
+        .log-message {
+            flex: 1;
+            color: #b0b0b0;
+        }
+
+        .metrics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+        }
+
+        .scenario-selector {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .scenario-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .scenario-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .scenario-card.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: #00d4ff;
+        }
+
+        .scenario-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .scenario-description {
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .scenario-difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .difficulty-easy {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .difficulty-medium {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .difficulty-hard {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 968px) {
+            .simulation-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .threat-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">AegisCore</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="policies.html" class="nav-link">Policies</a></li>
+                <li><a href="download.html" class="nav-link">Download</a></li>
+                <li><a href="simulation.html" class="nav-link active">Simulation</a></li>
+                <li><a href="checklist.html" class="nav-link">Checklist</a></li>
+                <li><a href="demo.html" class="nav-link">Demo</a></li>
+                <li><a href="comparison.html" class="nav-link">Compare</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="legal.html" class="nav-link">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="simulation-hero">
+            <div class="simulation-container">
+                <h1>Interactive Threat Simulation</h1>
+                <p>Experience real-time cyber attack scenarios and see how AegisCore defends your system</p>
+            </div>
+        </section>
+
+        <section class="scenarios">
+            <div class="simulation-container">
+                <div class="scenario-selector fade-in">
+                    <h2 class="section-title">Select Attack Scenario</h2>
+                    <div class="scenario-grid">
+                        <div class="scenario-card" onclick="selectScenario('malware')">
+                            <h3 class="scenario-title">🦠 Malware Attack</h3>
+                            <p class="scenario-description">
+                                Simulate a malware infection attempt and watch AegisCore detect and neutralize the threat in real-time.
+                            </p>
+                            <span class="scenario-difficulty difficulty-easy">Easy</span>
+                        </div>
+                        <div class="scenario-card" onclick="selectScenario('ransomware')">
+                            <h3 class="scenario-title">🔒 Ransomware Attack</h3>
+                            <p class="scenario-description">
+                                Experience a sophisticated ransomware attack and see how AegisCore prevents file encryption.
+                            </p>
+                            <span class="scenario-difficulty difficulty-medium">Medium</span>
+                        </div>
+                        <div class="scenario-card" onclick="selectScenario('apt')">
+                            <h3 class="scenario-title">🎯 Advanced Persistent Threat</h3>
+                            <p class="scenario-description">
+                                Face a multi-stage APT attack with lateral movement and data exfiltration attempts.
+                            </p>
+                            <span class="scenario-difficulty difficulty-hard">Hard</span>
+                        </div>
+                        <div class="scenario-card" onclick="selectScenario('insider')">
+                            <h3 class="scenario-title">👤 Insider Threat</h3>
+                            <p class="scenario-description">
+                                Simulate an insider threat scenario with unauthorized data access attempts.
+                            </p>
+                            <span class="scenario-difficulty difficulty-medium">Medium</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="simulation-control">
+            <div class="simulation-container">
+                <div class="simulation-control-panel fade-in">
+                    <div class="control-header">
+                        <h2 class="control-title">🎮 Simulation Control</h2>
+                        <div class="simulation-status">
+                            <div class="status-dot"></div>
+                            <span id="simStatus">Ready</span>
+                        </div>
+                    </div>
+
+                    <div class="threat-controls">
+                        <div class="threat-button" onclick="launchAttack('phishing')">
+                            <span class="threat-icon">🎣</span>
+                            <div class="threat-name">Phishing Attack</div>
+                            <div class="threat-description">Simulate email-based phishing attempts</div>
+                        </div>
+                        <div class="threat-button" onclick="launchAttack('malware')">
+                            <span class="threat-icon">🦠</span>
+                            <div class="threat-name">Malware Injection</div>
+                            <div class="threat-description">Inject malicious code into system processes</div>
+                        </div>
+                        <div class="threat-button" onclick="launchAttack('network')">
+                            <span class="threat-icon">🌐</span>
+                            <div class="threat-name">Network Breach</div>
+                            <div class="threat-description">Attempt unauthorized network access</div>
+                        </div>
+                        <div class="threat-button" onclick="launchAttack('usb')">
+                            <span class="threat-icon">🔌</span>
+                            <div class="threat-name">USB Attack</div>
+                            <div class="threat-description">Simulate malicious USB device connection</div>
+                        </div>
+                        <div class="threat-button" onclick="launchAttack('privilege')">
+                            <span class="threat-icon">⬆️</span>
+                            <div class="threat-name">Privilege Escalation</div>
+                            <div class="threat-description">Attempt to gain elevated permissions</div>
+                        </div>
+                        <div class="threat-button" onclick="launchAttack('data')">
+                            <span class="threat-icon">💾</span>
+                            <div class="threat-name">Data Exfiltration</div>
+                            <div class="threat-description">Attempt to steal sensitive data</div>
+                        </div>
+                    </div>
+
+                    <div class="metrics-dashboard">
+                        <div class="metric-card">
+                            <div class="metric-value" id="attacksBlocked">0</div>
+                            <div class="metric-label">Attacks Blocked</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="threatsDetected">0</div>
+                            <div class="metric-label">Threats Detected</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="systemHealth">100%</div>
+                            <div class="metric-label">System Health</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="responseTime">0ms</div>
+                            <div class="metric-label">Response Time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="simulation-visualization">
+            <div class="simulation-container">
+                <div class="simulation-area">
+                    <div class="attack-simulation fade-in">
+                        <h3 class="simulation-title">⚔️ Attack Simulation</h3>
+                        <div class="simulation-viewport" id="attackViewport">
+                            <!-- Attack visualization will be rendered here -->
+                        </div>
+                        <div class="event-log" id="attackLog">
+                            <div class="log-entry info">
+                                <span class="log-time">00:00:00</span>
+                                <span class="log-message">Attack simulation ready. Select an attack type to begin.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="defense-simulation fade-in">
+                        <h3 class="simulation-title">🛡️ Defense Response</h3>
+                        <div class="simulation-viewport" id="defenseViewport">
+                            <!-- Defense visualization will be rendered here -->
+                        </div>
+                        <div class="event-log" id="defenseLog">
+                            <div class="log-entry info">
+                                <span class="log-time">00:00:00</span>
+                                <span class="log-message">AegisCore defense systems active and monitoring.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AegisCore Security Framework. Research & Educational Use.</p>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+    <script>
+        // Simulation JavaScript
+        let simulationActive = false;
+        let currentScenario = null;
+        let metrics = {
+            attacksBlocked: 0,
+            threatsDetected: 0,
+            systemHealth: 100,
+            responseTime: 0
+        };
+
+        function selectScenario(scenario) {
+            // Remove active class from all cards
+            document.querySelectorAll('.scenario-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            
+            // Add active class to selected card
+            event.target.closest('.scenario-card').classList.add('active');
+            currentScenario = scenario;
+            
+            addLogEntry('info', `Scenario selected: ${scenario.toUpperCase()}`);
+            resetSimulation();
+        }
+
+        function launchAttack(attackType) {
+            if (!currentScenario) {
+                alert('Please select a scenario first!');
+                return;
+            }
+            
+            if (simulationActive) {
+                return;
+            }
+            
+            simulationActive = true;
+            updateStatus('Attack in progress...');
+            
+            // Simulate attack
+            simulateAttack(attackType);
+            
+            // Simulate defense response
+            setTimeout(() => {
+                simulateDefense(attackType);
+            }, 1000);
+        }
+
+        function simulateAttack(attackType) {
+            const attackViewport = document.getElementById('attackViewport');
+            const attackLog = document.getElementById('attackLog');
+            
+            // Clear previous visualization
+            attackViewport.innerHTML = '';
+            
+            // Create system nodes
+            const nodes = [
+                { id: 'server', x: 50, y: 20, icon: '🖥️', label: 'Server' },
+                { id: 'database', x: 20, y: 50, icon: '🗄️', label: 'Database' },
+                { id: 'client', x: 80, y: 50, icon: '💻', label: 'Client' },
+                { id: 'network', x: 50, y: 80, icon: '🌐', label: 'Network' }
+            ];
+            
+            nodes.forEach(node => {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'system-node';
+                nodeElement.style.left = node.x + '%';
+                nodeElement.style.top = node.y + '%';
+                nodeElement.innerHTML = node.icon;
+                nodeElement.title = node.label;
+                attackViewport.appendChild(nodeElement);
+            });
+            
+            // Log attack initiation
+            addLogEntry('attack', `Launching ${attackType} attack...`);
+            
+            // Simulate attack progression
+            let attackStep = 0;
+            const attackSteps = getAttackSteps(attackType);
+            
+            const attackInterval = setInterval(() => {
+                if (attackStep < attackSteps.length) {
+                    const step = attackSteps[attackStep];
+                    addLogEntry('attack', step.message);
+                    
+                    // Visualize attack
+                    if (step.target) {
+                        const targetNode = attackViewport.querySelector(`.system-node[title="${step.target}"]`);
+                        if (targetNode) {
+                            targetNode.classList.add('compromised');
+                        }
+                    }
+                    
+                    attackStep++;
+                } else {
+                    clearInterval(attackInterval);
+                    simulationActive = false;
+                }
+            }, 800);
+        }
+
+        function simulateDefense(attackType) {
+            const defenseViewport = document.getElementById('defenseViewport');
+            const defenseLog = document.getElementById('defenseLog');
+            
+            // Clear previous visualization
+            defenseViewport.innerHTML = '';
+            
+            // Create protected system nodes
+            const nodes = [
+                { id: 'server', x: 50, y: 20, icon: '🖥️', label: 'Server' },
+                { id: 'database', x: 20, y: 50, icon: '🗄️', label: 'Database' },
+                { id: 'client', x: 80, y: 50, icon: '💻', label: 'Client' },
+                { id: 'network', x: 50, y: 80, icon: '🌐', label: 'Network' }
+            ];
+            
+            nodes.forEach(node => {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'system-node protected';
+                nodeElement.style.left = node.x + '%';
+                nodeElement.style.top = node.y + '%';
+                nodeElement.innerHTML = node.icon;
+                nodeElement.title = node.label;
+                defenseViewport.appendChild(nodeElement);
+            });
+            
+            // Add defense shields
+            nodes.forEach(node => {
+                const shield = document.createElement('div');
+                shield.className = 'defense-shield';
+                shield.style.left = (node.x - 5) + '%';
+                shield.style.top = (node.y - 5) + '%';
+                shield.innerHTML = '🛡️';
+                defenseViewport.appendChild(shield);
+            });
+            
+            // Log defense response
+            addLogEntry('defense', `AegisCore detecting ${attackType} attack...`);
+            
+            // Simulate defense response
+            const defenseSteps = getDefenseSteps(attackType);
+            let defenseStep = 0;
+            
+            const defenseInterval = setInterval(() => {
+                if (defenseStep < defenseSteps.length) {
+                    const step = defenseSteps[defenseStep];
+                    addLogEntry('defense', step.message);
+                    
+                    defenseStep++;
+                    
+                    // Update metrics
+                    updateMetrics(step);
+                } else {
+                    clearInterval(defenseInterval);
+                    updateStatus('Attack neutralized');
+                    metrics.attacksBlocked++;
+                    updateMetricsDisplay();
+                }
+            }, 600);
+        }
+
+        function getAttackSteps(attackType) {
+            const attackSteps = {
+                phishing: [
+                    { message: 'Sending phishing email to target users...', target: 'Client' },
+                    { message: 'User clicked malicious link...', target: 'Client' },
+                    { message: 'Attempting to download malware payload...', target: 'Client' },
+                    { message: 'Trying to establish C2 connection...', target: 'Network' }
+                ],
+                malware: [
+                    { message: 'Injecting malicious code into system process...', target: 'Server' },
+                    { message: 'Attempting to bypass security controls...', target: 'Server' },
+                    { message: 'Trying to escalate privileges...', target: 'Server' },
+                    { message: 'Attempting to persist in system...', target: 'Server' }
+                ],
+                network: [
+                    { message: 'Scanning for open ports...', target: 'Network' },
+                    { message: 'Attempting to exploit vulnerability...', target: 'Network' },
+                    { message: 'Trying to gain unauthorized access...', target: 'Server' },
+                    { message: 'Attempting lateral movement...', target: 'Database' }
+                ],
+                usb: [
+                    { message: 'Connecting malicious USB device...', target: 'Client' },
+                    { message: 'Attempting to execute autorun payload...', target: 'Client' },
+                    { message: 'Trying to install rootkit...', target: 'Client' },
+                    { message: 'Attempting to exfiltrate data...', target: 'Client' }
+                ],
+                privilege: [
+                    { message: 'Exploiting privilege escalation vulnerability...', target: 'Server' },
+                    { message: 'Attempting to gain admin rights...', target: 'Server' },
+                    { message: 'Trying to disable security software...', target: 'Server' },
+                    { message: 'Attempting to access protected resources...', target: 'Database' }
+                ],
+                data: [
+                    { message: 'Scanning for sensitive files...', target: 'Database' },
+                    { message: 'Attempting to access protected data...', target: 'Database' },
+                    { message: 'Trying to encrypt files for ransom...', target: 'Database' },
+                    { message: 'Attempting to exfiltrate data to external server...', target: 'Network' }
+                ]
+            };
+            
+            return attackSteps[attackType] || attackSteps.malware;
+        }
+
+        function getDefenseSteps(attackType) {
+            const defenseSteps = {
+                phishing: [
+                    { message: 'Email scanning detected suspicious content', threatsDetected: 1 },
+                    { message: 'URL filtering blocked malicious link', threatsDetected: 1 },
+                    { message: 'Malware download prevented', threatsDetected: 1 },
+                    { message: 'C2 connection blocked by firewall', threatsDetected: 1 }
+                ],
+                malware: [
+                    { message: 'Process monitoring detected suspicious activity', threatsDetected: 1 },
+                    { message: 'Behavioral analysis blocked execution', threatsDetected: 1 },
+                    { message: 'Privilege escalation prevented', threatsDetected: 1 },
+                    { message: 'System integrity restored', threatsDetected: 0 }
+                ],
+                network: [
+                    { message: 'Port scan detected and logged', threatsDetected: 1 },
+                    { message: 'Intrusion prevention system activated', threatsDetected: 1 },
+                    { message: 'Unauthorized access blocked', threatsDetected: 1 },
+                    { message: 'Network segmentation enforced', threatsDetected: 0 }
+                ],
+                usb: [
+                    { message: 'USB device monitoring activated', threatsDetected: 1 },
+                    { message: 'Autorun functionality disabled', threatsDetected: 1 },
+                    { message: 'Rootkit installation prevented', threatsDetected: 1 },
+                    { message: 'Device placed in quarantine', threatsDetected: 0 }
+                ],
+                privilege: [
+                    { message: 'Privilege escalation attempt detected', threatsDetected: 1 },
+                    { message: 'UAC enforcement blocked escalation', threatsDetected: 1 },
+                    { message: 'Security software protection enabled', threatsDetected: 1 },
+                    { message: 'Access control enforced', threatsDetected: 0 }
+                ],
+                data: [
+                    { message: 'File access monitoring active', threatsDetected: 1 },
+                    { message: 'Data loss prevention blocked access', threatsDetected: 1 },
+                    { message: 'Ransomware behavior detected and stopped', threatsDetected: 1 },
+                    { message: 'Data exfiltration prevented', threatsDetected: 1 }
+                ]
+            };
+            
+            return defenseSteps[attackType] || defenseSteps.malware;
+        }
+
+        function addLogEntry(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logClass = type === 'attack' ? 'attack' : type === 'defense' ? 'defense' : 'info';
+            
+            // Add to attack log
+            const attackLog = document.getElementById('attackLog');
+            if (type === 'attack' || type === 'info') {
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${logClass}`;
+                entry.innerHTML = `
+                    <span class="log-time">${timestamp}</span>
+                    <span class="log-message">${message}</span>
+                `;
+                attackLog.appendChild(entry);
+                attackLog.scrollTop = attackLog.scrollHeight;
+            }
+            
+            // Add to defense log
+            const defenseLog = document.getElementById('defenseLog');
+            if (type === 'defense' || type === 'info') {
+                const entry = document.createElement('div');
+                entry.className = `log-entry ${logClass}`;
+                entry.innerHTML = `
+                    <span class="log-time">${timestamp}</span>
+                    <span class="log-message">${message}</span>
+                `;
+                defenseLog.appendChild(entry);
+                defenseLog.scrollTop = defenseLog.scrollHeight;
+            }
+        }
+
+        function updateMetrics(step) {
+            if (step.threatsDetected) {
+                metrics.threatsDetected += step.threatsDetected;
+            }
+            
+            // Simulate response time
+            metrics.responseTime = Math.floor(Math.random() * 50) + 10;
+            
+            // Update system health
+            metrics.systemHealth = Math.max(85, metrics.systemHealth - Math.random() * 5);
+            
+            updateMetricsDisplay();
+        }
+
+        function updateMetricsDisplay() {
+            document.getElementById('attacksBlocked').textContent = metrics.attacksBlocked;
+            document.getElementById('threatsDetected').textContent = metrics.threatsDetected;
+            document.getElementById('systemHealth').textContent = Math.floor(metrics.systemHealth) + '%';
+            document.getElementById('responseTime').textContent = metrics.responseTime + 'ms';
+        }
+
+        function updateStatus(status) {
+            document.getElementById('simStatus').textContent = status;
+        }
+
+        function resetSimulation() {
+            // Clear visualizations
+            document.getElementById('attackViewport').innerHTML = '';
+            document.getElementById('defenseViewport').innerHTML = '';
+            
+            // Reset metrics
+            metrics = {
+                attacksBlocked: 0,
+                threatsDetected: 0,
+                systemHealth: 100,
+                responseTime: 0
+            };
+            updateMetricsDisplay();
+            
+            // Clear logs
+            document.getElementById('attackLog').innerHTML = `
+                <div class="log-entry info">
+                    <span class="log-time">00:00:00</span>
+                    <span class="log-message">Attack simulation ready. Select an attack type to begin.</span>
+                </div>
+            `;
+            
+            document.getElementById('defenseLog').innerHTML = `
+                <div class="log-entry info">
+                    <span class="log-time">00:00:00</span>
+                    <span class="log-message">AegisCore defense systems active and monitoring.</span>
+                </div>
+            `;
+            
+            updateStatus('Ready');
+            simulationActive = false;
+        }
+
+        // Initialize simulation on load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateMetricsDisplay();
+        });
+    </script>
+</body>
+</html>

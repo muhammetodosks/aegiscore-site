@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Demonstration - AegisCore Security Framework</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Demo Specific Styles */
+        .demo-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .demo-hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a0a 100%);
+            padding: 80px 0;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .demo-hero h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .demo-hero p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .demo-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .demo-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .demo-description {
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .demo-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .demo-button {
+            padding: 12px 20px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            color: #00d4ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .demo-button:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .demo-button.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            border-color: #00d4ff;
+            color: #ffffff;
+        }
+
+        .demo-output {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #00ff88;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .demo-output.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border-radius: 4px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.warning {
+            background: #ffc107;
+        }
+
+        .status-dot.danger {
+            background: #ff4757;
+        }
+
+        .interactive-demo {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        .demo-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+
+        .demo-tab:hover {
+            color: #00d4ff;
+        }
+
+        .demo-tab.active {
+            color: #00d4ff;
+            border-bottom-color: #00d4ff;
+        }
+
+        .demo-content {
+            display: none;
+        }
+
+        .demo-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .simulation-area {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .threat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .threat-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .threat-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .threat-icon {
+            font-size: 1.5rem;
+        }
+
+        .threat-details h4 {
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .threat-details p {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .threat-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .threat-status.blocked {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .threat-status.monitoring {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .threat-status.safe {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+
+        .policy-editor {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .policy-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .policy-toggle {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .policy-toggle.active {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+        }
+
+        .policy-toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: #ffffff;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        .policy-toggle.active::after {
+            transform: translateX(26px);
+        }
+
+        .network-visual {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .network-node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .network-node.safe {
+            background: rgba(0, 255, 136, 0.2);
+            border: 2px solid #00ff88;
+        }
+
+        .network-node.blocked {
+            background: rgba(255, 71, 87, 0.2);
+            border: 2px solid #ff4757;
+        }
+
+        .network-node.monitoring {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+        }
+
+        .network-node:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .network-connection {
+            position: absolute;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            transform-origin: left center;
+            pointer-events: none;
+        }
+
+        .network-connection.blocked {
+            background: rgba(255, 71, 87, 0.5);
+        }
+
+        .network-connection.safe {
+            background: rgba(0, 255, 136, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .demo-tab {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">AegisCore</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="policies.html" class="nav-link">Policies</a></li>
+                <li><a href="download.html" class="nav-link">Download</a></li>
+                <li><a href="demo.html" class="nav-link active">Demo</a></li>
+                <li><a href="comparison.html" class="nav-link">Compare</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="legal.html" class="nav-link">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="demo-hero">
+            <div class="demo-container">
+                <h1>Interactive Feature Demonstration</h1>
+                <p>Experience AegisCore's security features through live simulations</p>
+            </div>
+        </section>
+
+        <section class="demo-features">
+            <div class="demo-container">
+                <div class="demo-grid">
+                    <div class="demo-card fade-in">
+                        <div class="demo-header">
+                            <div class="demo-icon">🛡️</div>
+                            <h3 class="demo-title">Real-time Protection</h3>
+                        </div>
+                        <p class="demo-description">
+                            See how AegisCore monitors and blocks threats in real-time with advanced detection algorithms.
+                        </p>
+                        <div class="demo-controls">
+                            <button class="demo-button" onclick="startProtectionDemo()">Start Protection Scan</button>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="protectionProgress"></div>
+                            </div>
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                                <span id="protectionStatus">Ready to scan</span>
+                            </div>
+                            <div class="demo-output" id="protectionOutput"></div>
+                        </div>
+                    </div>
+
+                    <div class="demo-card fade-in">
+                        <div class="demo-header">
+                            <div class="demo-icon">🔌</div>
+                            <h3 class="demo-title">USB Device Control</h3>
+                        </div>
+                        <p class="demo-description">
+                            Experience how AegisCore manages USB devices with charge-only mode and device whitelisting.
+                        </p>
+                        <div class="demo-controls">
+                            <button class="demo-button" onclick="simulateUSBDevice()">Simulate USB Connection</button>
+                            <button class="demo-button" onclick="toggleUSBWhitelist()">Toggle Whitelist Mode</button>
+                            <div class="status-indicator">
+                                <div class="status-dot" id="usbStatusDot"></div>
+                                <span id="usbStatus">USB monitoring active</span>
+                            </div>
+                            <div class="demo-output" id="usbOutput"></div>
+                        </div>
+                    </div>
+
+                    <div class="demo-card fade-in">
+                        <div class="demo-header">
+                            <div class="demo-icon">🌐</div>
+                            <h3 class="demo-title">Network Filtering</h3>
+                        </div>
+                        <p class="demo-description">
+                            Watch AegisCore filter network traffic and block unauthorized connections in real-time.
+                        </p>
+                        <div class="demo-controls">
+                            <button class="demo-button" onclick="startNetworkFiltering()">Start Network Monitor</button>
+                            <button class="demo-button" onclick="simulateNetworkTraffic()">Generate Traffic</button>
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                                <span id="networkStatus">Network filter ready</span>
+                            </div>
+                            <div class="demo-output" id="networkOutput"></div>
+                        </div>
+                    </div>
+
+                    <div class="demo-card fade-in">
+                        <div class="demo-header">
+                            <div class="demo-icon">📋</div>
+                            <h3 class="demo-title">Policy Management</h3>
+                        </div>
+                        <p class="demo-description">
+                            Configure and test security policies with instant feedback and validation.
+                        </p>
+                        <div class="demo-controls">
+                            <button class="demo-button" onclick="showPolicyEditor()">Open Policy Editor</button>
+                            <button class="demo-button" onclick="applyPolicies()">Apply Changes</button>
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                                <span id="policyStatus">Policies loaded</span>
+                            </div>
+                            <div class="demo-output" id="policyOutput"></div>
+                        </div>
+                    </div>
+
+                    <div class="demo-card fade-in">
+                        <div class="demo-header">
+                            <div class="demo-icon">🔍</div>
+                            <h3 class="demo-title">Threat Detection</h3>
+                        </div>
+                        <p class="demo-description">
+                            Simulate various threat scenarios and see how AegisCore responds to different attack vectors.
+                        </p>
+                        <div class="demo-controls">
+                            <button class="demo-button" onclick="simulateThreat('malware')">Simulate Malware</button>
+                            <button class="demo-button" onclick="simulateThreat('phishing')">Simulate Phishing</button>
+                            <button class="demo-button" onclick="simulateThreat('ransomware')">Simulate Ransomware</button>
+                            <div class="demo-output" id="threatOutput"></div>
+                        </div>
+                    </div>
+
+                    <div class="demo-card fade-in">
+                        <div class="demo-header">
+                            <div class="demo-icon">📊</div>
+                            <h3 class="demo-title">Performance Monitor</h3>
+                        </div>
+                        <p class="demo-description">
+                            Monitor system performance and resource usage while AegisCore is running.
+                        </p>
+                        <div class="demo-controls">
+                            <button class="demo-button" onclick="startPerformanceMonitor()">Start Monitoring</button>
+                            <button class="demo-button" onclick="generateLoad()">Generate Load</button>
+                            <div class="status-indicator">
+                                <div class="status-dot"></div>
+                                <span id="performanceStatus">Performance optimal</span>
+                            </div>
+                            <div class="demo-output" id="performanceOutput"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="interactive-demo">
+            <div class="demo-container">
+                <h2 class="section-title">Advanced Security Simulations</h2>
+                
+                <div class="demo-tabs">
+                    <button class="demo-tab active" onclick="switchTab('threat-simulation')">Threat Simulation</button>
+                    <button class="demo-tab" onclick="switchTab('policy-configuration')">Policy Configuration</button>
+                    <button class="demo-tab" onclick="switchTab('network-visualization')">Network Visualization</button>
+                </div>
+
+                <div class="demo-content active" id="threat-simulation">
+                    <h3>Real-time Threat Detection Simulation</h3>
+                    <p>Watch as AegisCore detects and blocks various types of threats in real-time.</p>
+                    
+                    <div class="simulation-area" id="threatSimulationArea">
+                        <!-- Threat items will be dynamically added here -->
+                    </div>
+                </div>
+
+                <div class="demo-content" id="policy-configuration">
+                    <h3>Interactive Policy Configuration</h3>
+                    <p>Configure security policies and see their impact on system behavior.</p>
+                    
+                    <div class="policy-editor">
+                        <div class="policy-item">
+                            <div>
+                                <h4>USB Data Blocking</h4>
+                                <p>Block all USB data transfers while allowing charging</p>
+                            </div>
+                            <div class="policy-toggle active" onclick="togglePolicy(this)"></div>
+                        </div>
+                        <div class="policy-item">
+                            <div>
+                                <h4>Script Execution Control</h4>
+                                <p>Control execution of PowerShell and batch scripts</p>
+                            </div>
+                            <div class="policy-toggle active" onclick="togglePolicy(this)"></div>
+                        </div>
+                        <div class="policy-item">
+                            <div>
+                                <h4>Network Filtering</h4>
+                                <p>Filter network traffic based on whitelist rules</p>
+                            </div>
+                            <div class="policy-toggle" onclick="togglePolicy(this)"></div>
+                        </div>
+                        <div class="policy-item">
+                            <div>
+                                <h4>Process Monitoring</h4>
+                                <p>Monitor and control process execution</p>
+                            </div>
+                            <div class="policy-toggle active" onclick="togglePolicy(this)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-content" id="network-visualization">
+                    <h3>Network Traffic Visualization</h3>
+                    <p>Visualize network connections and see how AegisCore filters traffic.</p>
+                    
+                    <div class="network-visual" id="networkVisual">
+                        <!-- Network nodes and connections will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AegisCore Security Framework. Research & Educational Use.</p>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+    <script>
+        // Demo JavaScript
+        let protectionInterval;
+        let networkInterval;
+        let performanceInterval;
+        let whitelistMode = false;
+
+        // Protection Demo
+        function startProtectionDemo() {
+            const output = document.getElementById('protectionOutput');
+            const progress = document.getElementById('protectionProgress');
+            const status = document.getElementById('protectionStatus');
+            
+            output.classList.add('active');
+            output.innerHTML = 'Initializing protection scan...\n';
+            status.textContent = 'Scanning in progress';
+            
+            let progressValue = 0;
+            const scanSteps = [
+                'Checking system integrity...',
+                'Scanning for malware signatures...',
+                'Analyzing running processes...',
+                'Validating security policies...',
+                'Checking network connections...',
+                'Verifying file system integrity...',
+                'Scan complete!'
+            ];
+            
+            protectionInterval = setInterval(() => {
+                progressValue += 100 / scanSteps.length;
+                progress.style.width = progressValue + '%';
+                
+                const stepIndex = Math.floor((progressValue / 100) * scanSteps.length);
+                if (stepIndex < scanSteps.length) {
+                    output.innerHTML += scanSteps[stepIndex] + '\n';
+                    output.scrollTop = output.scrollHeight;
+                }
+                
+                if (progressValue >= 100) {
+                    clearInterval(protectionInterval);
+                    status.textContent = 'Scan complete - System secure';
+                    output.innerHTML += '\n✓ No threats detected\n✓ All security policies active\n✓ System integrity verified';
+                }
+            }, 800);
+        }
+
+        // USB Demo
+        function simulateUSBDevice() {
+            const output = document.getElementById('usbOutput');
+            const statusDot = document.getElementById('usbStatusDot');
+            const status = document.getElementById('usbStatus');
+            
+            output.classList.add('active');
+            output.innerHTML = 'USB device detected...\n';
+            
+            setTimeout(() => {
+                if (whitelistMode) {
+                    output.innerHTML += 'Device not in whitelist\n';
+                    output.innerHTML += '⚠ USB access blocked\n';
+                    output.innerHTML += 'Device allowed: Charge-only mode\n';
+                    statusDot.className = 'status-dot warning';
+                    status.textContent = 'USB device blocked (whitelist mode)';
+                } else {
+                    output.innerHTML += '✓ USB device authorized\n';
+                    output.innerHTML += 'Device type: External Storage\n';
+                    output.innerHTML += 'Status: Monitoring data transfers\n';
+                    statusDot.className = 'status-dot';
+                    status.textContent = 'USB device connected and monitored';
+                }
+            }, 1000);
+        }
+
+        function toggleUSBWhitelist() {
+            whitelistMode = !whitelistMode;
+            const output = document.getElementById('usbOutput');
+            output.classList.add('active');
+            output.innerHTML = `USB whitelist mode: ${whitelistMode ? 'ENABLED' : 'DISABLED'}\n`;
+        }
+
+        // Network Demo
+        function startNetworkFiltering() {
+            const output = document.getElementById('networkOutput');
+            const status = document.getElementById('networkStatus');
+            
+            output.classList.add('active');
+            output.innerHTML = 'Starting network filter...\n';
+            status.textContent = 'Network filter active';
+            
+            networkInterval = setInterval(() => {
+                const connections = [
+                    { ip: '192.168.1.100', status: 'safe', action: 'Allowed' },
+                    { ip: '10.0.0.50', status: 'blocked', action: 'Blocked' },
+                    { ip: '172.16.0.25', status: 'safe', action: 'Allowed' },
+                    { ip: '203.0.113.1', status: 'blocked', action: 'Blocked' }
+                ];
+                
+                const conn = connections[Math.floor(Math.random() * connections.length)];
+                output.innerHTML += `[${new Date().toLocaleTimeString()}] Connection from ${conn.ip}: ${conn.action}\n`;
+                output.scrollTop = output.scrollHeight;
+            }, 2000);
+        }
+
+        function simulateNetworkTraffic() {
+            const output = document.getElementById('networkOutput');
+            output.classList.add('active');
+            output.innerHTML += 'Generating network traffic...\n';
+            
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const types = ['HTTP', 'HTTPS', 'FTP', 'SSH', 'DNS'];
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    const allowed = Math.random() > 0.3;
+                    output.innerHTML += `${type} request: ${allowed ? '✓ Allowed' : '✗ Blocked'}\n`;
+                    output.scrollTop = output.scrollHeight;
+                }, i * 500);
+            }
+        }
+
+        // Policy Demo
+        function showPolicyEditor() {
+            const output = document.getElementById('policyOutput');
+            output.classList.add('active');
+            output.innerHTML = 'Loading policy editor...\n';
+            output.innerHTML += 'Current policies loaded successfully\n';
+            output.innerHTML += '4 security policies active\n';
+        }
+
+        function applyPolicies() {
+            const output = document.getElementById('policyOutput');
+            const status = document.getElementById('policyStatus');
+            output.innerHTML += 'Applying policy changes...\n';
+            
+            setTimeout(() => {
+                output.innerHTML += '✓ Policies updated successfully\n';
+                output.innerHTML += '✓ System reconfigured\n';
+                status.textContent = 'Policies applied';
+            }, 1000);
+        }
+
+        // Threat Simulation
+        function simulateThreat(type) {
+            const output = document.getElementById('threatOutput');
+            output.classList.add('active');
+            
+            const threats = {
+                malware: {
+                    name: 'Trojan.Generic',
+                    action: 'Blocked and quarantined',
+                    details: 'Malicious executable detected'
+                },
+                phishing: {
+                    name: 'Phishing.Attempt',
+                    action: 'Connection blocked',
+                    details: 'Suspicious URL detected'
+                },
+                ransomware: {
+                    name: 'Ransomware.Crypto',
+                    action: 'Process terminated',
+                    details: 'File encryption attempt blocked'
+                }
+            };
+            
+            const threat = threats[type];
+            output.innerHTML = `⚠ THREAT DETECTED\n`;
+            output.innerHTML += `Type: ${threat.name}\n`;
+            output.innerHTML += `Action: ${threat.action}\n`;
+            output.innerHTML += `Details: ${threat.details}\n`;
+            output.innerHTML += `Time: ${new Date().toLocaleTimeString()}\n`;
+        }
+
+        // Performance Monitor
+        function startPerformanceMonitor() {
+            const output = document.getElementById('performanceOutput');
+            const status = document.getElementById('performanceStatus');
+            
+            output.classList.add('active');
+            output.innerHTML = 'Starting performance monitor...\n';
+            status.textContent = 'Monitoring active';
+            
+            performanceInterval = setInterval(() => {
+                const cpu = Math.floor(Math.random() * 30) + 10;
+                const memory = Math.floor(Math.random() * 20) + 40;
+                const network = Math.floor(Math.random() * 50) + 10;
+                
+                output.innerHTML = `CPU Usage: ${cpu}%\n`;
+                output.innerHTML += `Memory Usage: ${memory}%\n`;
+                output.innerHTML += `Network I/O: ${network} MB/s\n`;
+                output.innerHTML += `Status: Optimal\n`;
+            }, 2000);
+        }
+
+        function generateLoad() {
+            const output = document.getElementById('performanceOutput');
+            output.innerHTML += 'Generating system load...\n';
+            
+            setTimeout(() => {
+                output.innerHTML += 'Load test completed\n';
+                output.innerHTML += 'Performance within acceptable limits\n';
+            }, 2000);
+        }
+
+        // Tab Switching
+        function switchTab(tabId) {
+            // Remove active class from all tabs and contents
+            document.querySelectorAll('.demo-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.demo-content').forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            event.target.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            
+            // Initialize tab-specific content
+            if (tabId === 'threat-simulation') {
+                initThreatSimulation();
+            } else if (tabId === 'network-visualization') {
+                initNetworkVisualization();
+            }
+        }
+
+        // Initialize Threat Simulation
+        function initThreatSimulation() {
+            const area = document.getElementById('threatSimulationArea');
+            area.innerHTML = '';
+            
+            const threats = [
+                { icon: '🦠', name: 'Malware Detected', status: 'blocked', description: 'Suspicious executable blocked' },
+                { icon: '🎣', name: 'Phishing Attempt', status: 'blocked', description: 'Malicious URL filtered' },
+                { icon: '🔒', name: 'Ransomware Stopped', status: 'blocked', description: 'File encryption prevented' },
+                { icon: '🌐', name: 'Network Intrusion', status: 'monitoring', description: 'Suspicious traffic monitored' },
+                { icon: '✅', name: 'System Secure', status: 'safe', description: 'No active threats detected' }
+            ];
+            
+            threats.forEach((threat, index) => {
+                setTimeout(() => {
+                    const item = document.createElement('div');
+                    item.className = 'threat-item';
+                    item.innerHTML = `
+                        <div class="threat-info">
+                            <div class="threat-icon">${threat.icon}</div>
+                            <div class="threat-details">
+                                <h4>${threat.name}</h4>
+                                <p>${threat.description}</p>
+                            </div>
+                        </div>
+                        <div class="threat-status ${threat.status}">${threat.status.toUpperCase()}</div>
+                    `;
+                    area.appendChild(item);
+                }, index * 500);
+            });
+        }
+
+        // Initialize Network Visualization
+        function initNetworkVisualization() {
+            const visual = document.getElementById('networkVisual');
+            visual.innerHTML = '';
+            
+            // Create network nodes
+            const nodes = [
+                { id: 'center', x: 50, y: 50, type: 'safe', icon: '🖥️' },
+                { id: 'server1', x: 20, y: 30, type: 'safe', icon: '🌐' },
+                { id: 'server2', x: 80, y: 30, type: 'blocked', icon: '🚫' },
+                { id: 'client1', x: 20, y: 70, type: 'monitoring', icon: '💻' },
+                { id: 'client2', x: 80, y: 70, type: 'safe', icon: '📱' }
+            ];
+            
+            // Create connections
+            const connections = [
+                { from: 'center', to: 'server1', type: 'safe' },
+                { from: 'center', to: 'server2', type: 'blocked' },
+                { from: 'center', to: 'client1', type: 'monitoring' },
+                { from: 'center', to: 'client2', type: 'safe' }
+            ];
+            
+            // Draw connections
+            connections.forEach(conn => {
+                const fromNode = nodes.find(n => n.id === conn.from);
+                const toNode = nodes.find(n => n.id === conn.to);
+                
+                const line = document.createElement('div');
+                line.className = `network-connection ${conn.type}`;
+                
+                const dx = toNode.x - fromNode.x;
+                const dy = toNode.y - fromNode.y;
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                line.style.left = fromNode.x + '%';
+                line.style.top = fromNode.y + '%';
+                line.style.width = length + '%';
+                line.style.transform = `rotate(${angle}deg)`;
+                
+                visual.appendChild(line);
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                const nodeElement = document.createElement('div');
+                nodeElement.className = `network-node ${node.type}`;
+                nodeElement.style.left = node.x + '%';
+                nodeElement.style.top = node.y + '%';
+                nodeElement.innerHTML = node.icon;
+                nodeElement.title = `${node.id} (${node.type})`;
+                
+                visual.appendChild(nodeElement);
+            });
+        }
+
+        // Policy Toggle
+        function togglePolicy(toggle) {
+            toggle.classList.toggle('active');
+            const isActive = toggle.classList.contains('active');
+            const policyName = toggle.parentElement.querySelector('h4').textContent;
+            
+            const output = document.getElementById('policyOutput');
+            output.classList.add('active');
+            output.innerHTML += `${policyName}: ${isActive ? 'ENABLED' : 'DISABLED'}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Initialize demo on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add fade-in animations
+            const cards = document.querySelectorAll('.demo-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 100}ms`;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Dashboard - AegisCore Security Framework</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Dashboard Specific Styles */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.3);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            opacity: 0.7;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-change.positive {
+            color: #00ff88;
+        }
+
+        .stat-change.negative {
+            color: #ff4757;
+        }
+
+        .stat-change.neutral {
+            color: #b0b0b0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border-radius: 4px;
+            transition: width 1s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .threat-map {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .threat-map-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .threat-map-title {
+            font-size: 1.3rem;
+            color: #ffffff;
+        }
+
+        .threat-legend {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .threat-grid {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 2px;
+            height: 300px;
+        }
+
+        .threat-cell {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .threat-cell.low {
+            background: rgba(0, 255, 136, 0.2);
+        }
+
+        .threat-cell.medium {
+            background: rgba(255, 193, 7, 0.3);
+        }
+
+        .threat-cell.high {
+            background: rgba(255, 71, 87, 0.3);
+        }
+
+        .threat-cell.critical {
+            background: rgba(255, 0, 0, 0.4);
+            animation: pulse-critical 2s infinite;
+        }
+
+        @keyframes pulse-critical {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+
+        .threat-cell:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .activity-feed {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .activity-header {
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #00ff88;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: pulse-live 2s infinite;
+        }
+
+        @keyframes pulse-live {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.success {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .activity-icon.warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+
+        .activity-icon.danger {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+
+        .activity-icon.info {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .metric-chart {
+            width: 100%;
+            height: 150px;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 20%;
+            background: linear-gradient(180deg, #00d4ff, #0099cc);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-top: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .threat-legend {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .activity-feed {
+                max-height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">AegisCore</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="policies.html" class="nav-link">Policies</a></li>
+                <li><a href="download.html" class="nav-link">Download</a></li>
+                <li><a href="dashboard.html" class="nav-link active">Dashboard</a></li>
+                <li><a href="legal.html" class="nav-link">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="page-header">
+            <div class="dashboard-container">
+                <h1>Security Dashboard</h1>
+                <p>Real-time monitoring and threat analysis</p>
+            </div>
+        </section>
+
+        <section class="dashboard-stats">
+            <div class="dashboard-container">
+                <div class="dashboard-grid">
+                    <div class="stat-card fade-in">
+                        <div class="stat-header">
+                            <span class="stat-title">Threats Blocked</span>
+                            <span class="stat-icon">🛡️</span>
+                        </div>
+                        <div class="stat-value" data-target="12847">0</div>
+                        <div class="stat-change positive">
+                            <span>↑</span>
+                            <span>12.5% from last hour</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" data-width="85%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card fade-in">
+                        <div class="stat-header">
+                            <span class="stat-title">Active Policies</span>
+                            <span class="stat-icon">📋</span>
+                        </div>
+                        <div class="stat-value" data-target="24">0</div>
+                        <div class="stat-change neutral">
+                            <span>→</span>
+                            <span>No change</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card fade-in">
+                        <div class="stat-header">
+                            <span class="stat-title">Security Score</span>
+                            <span class="stat-icon">📊</span>
+                        </div>
+                        <div class="stat-value" data-target="94">0</div>
+                        <div class="stat-change positive">
+                            <span>↑</span>
+                            <span>3 points improvement</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" data-width="94%"></div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card fade-in">
+                        <div class="stat-header">
+                            <span class="stat-title">System Health</span>
+                            <span class="stat-icon">💚</span>
+                        </div>
+                        <div class="stat-value" data-target="98">0</div>
+                        <div class="stat-change positive">
+                            <span>↑</span>
+                            <span>Optimal performance</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" data-width="98%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="threat-analysis">
+            <div class="dashboard-container">
+                <div class="threat-map fade-in">
+                    <div class="threat-map-header">
+                        <h2 class="threat-map-title">Global Threat Map</h2>
+                        <div class="threat-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: rgba(0, 255, 136, 0.5);"></div>
+                                <span>Low</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: rgba(255, 193, 7, 0.5);"></div>
+                                <span>Medium</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: rgba(255, 71, 87, 0.5);"></div>
+                                <span>High</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background: rgba(255, 0, 0, 0.5);"></div>
+                                <span>Critical</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="threat-grid" id="threatGrid"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-content">
+            <div class="dashboard-container">
+                <div class="dashboard-grid">
+                    <div class="activity-feed fade-in">
+                        <div class="activity-header">
+                            <h2>Live Activity Feed</h2>
+                            <div class="live-indicator">
+                                <div class="live-dot"></div>
+                                <span>LIVE</span>
+                            </div>
+                        </div>
+                        <div id="activityFeed"></div>
+                    </div>
+
+                    <div class="performance-metrics fade-in">
+                        <div class="metric-card">
+                            <h3>CPU Usage</h3>
+                            <div class="metric-chart">
+                                <div class="chart-bar" style="left: 0%; height: 30%;"></div>
+                                <div class="chart-bar" style="left: 25%; height: 45%;"></div>
+                                <div class="chart-bar" style="left: 50%; height: 25%;"></div>
+                                <div class="chart-bar" style="left: 75%; height: 35%;"></div>
+                            </div>
+                            <div class="metric-value">32%</div>
+                            <div class="metric-label">Average Load</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <h3>Memory Usage</h3>
+                            <div class="metric-chart">
+                                <div class="chart-bar" style="left: 0%; height: 60%;"></div>
+                                <div class="chart-bar" style="left: 25%; height: 55%;"></div>
+                                <div class="chart-bar" style="left: 50%; height: 65%;"></div>
+                                <div class="chart-bar" style="left: 75%; height: 58%;"></div>
+                            </div>
+                            <div class="metric-value">4.2GB</div>
+                            <div class="metric-label">Used Memory</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <h3>Network I/O</h3>
+                            <div class="metric-chart">
+                                <div class="chart-bar" style="left: 0%; height: 20%;"></div>
+                                <div class="chart-bar" style="left: 25%; height: 35%;"></div>
+                                <div class="chart-bar" style="left: 50%; height: 28%;"></div>
+                                <div class="chart-bar" style="left: 75%; height: 22%;"></div>
+                            </div>
+                            <div class="metric-value">125MB/s</div>
+                            <div class="metric-label">Transfer Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AegisCore Security Framework. Research & Educational Use.</p>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+    <script>
+        // Dashboard specific JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            initDashboard();
+        });
+
+        function initDashboard() {
+            animateCounters();
+            generateThreatMap();
+            startLiveActivityFeed();
+            animateProgressBars();
+            updateMetrics();
+        }
+
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-value[data-target]');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const duration = 2000;
+                const increment = target / (duration / 16);
+                let current = 0;
+                
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.textContent = Math.floor(current).toLocaleString();
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.textContent = target.toLocaleString();
+                    }
+                };
+                
+                // Start animation when element is visible
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            updateCounter();
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+                
+                observer.observe(counter);
+            });
+        }
+
+        function generateThreatMap() {
+            const grid = document.getElementById('threatGrid');
+            const threatLevels = ['low', 'medium', 'high', 'critical'];
+            const weights = [70, 20, 8, 2]; // Probability weights
+            
+            for (let i = 0; i < 200; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'threat-cell';
+                
+                // Weighted random selection
+                const random = Math.random() * 100;
+                let cumulative = 0;
+                let selectedLevel = 'low';
+                
+                for (let j = 0; j < weights.length; j++) {
+                    cumulative += weights[j];
+                    if (random <= cumulative) {
+                        selectedLevel = threatLevels[j];
+                        break;
+                    }
+                }
+                
+                cell.classList.add(selectedLevel);
+                
+                // Add tooltip functionality
+                cell.addEventListener('mouseenter', function(e) {
+                    this.title = `Threat Level: ${selectedLevel.toUpperCase()}`;
+                });
+                
+                grid.appendChild(cell);
+            }
+        }
+
+        function startLiveActivityFeed() {
+            const feed = document.getElementById('activityFeed');
+            const activities = [
+                {
+                    type: 'success',
+                    icon: '✓',
+                    title: 'USB Device Blocked',
+                    description: 'Unauthorized USB storage device blocked at port USB-3.1'
+                },
+                {
+                    type: 'warning',
+                    icon: '⚠',
+                    title: 'Suspicious Network Activity',
+                    description: 'Unusual outbound traffic detected to unknown IP range'
+                },
+                {
+                    type: 'danger',
+                    icon: '🚫',
+                    title: 'Malware Attempt Blocked',
+                    description: 'Trojan horse payload intercepted and neutralized'
+                },
+                {
+                    type: 'info',
+                    icon: 'ℹ',
+                    title: 'Policy Update Applied',
+                    description: 'Security policy v2.4.1 successfully deployed'
+                },
+                {
+                    type: 'success',
+                    icon: '✓',
+                    title: 'System Scan Complete',
+                    description: 'Full system scan completed - no threats found'
+                },
+                {
+                    type: 'warning',
+                    icon: '⚠',
+                    title: 'High Resource Usage',
+                    description: 'Process "suspicious.exe" using excessive CPU resources'
+                },
+                {
+                    type: 'info',
+                    icon: 'ℹ',
+                    title: 'Backup Completed',
+                    description: 'Security configuration backup completed successfully'
+                },
+                {
+                    type: 'success',
+                    icon: '✓',
+                    title: 'Firewall Rule Updated',
+                    description: 'New firewall rules applied to network interface'
+                }
+            ];
+            
+            let activityIndex = 0;
+            
+            function addActivity() {
+                const activity = activities[activityIndex % activities.length];
+                const time = new Date().toLocaleTimeString();
+                
+                const activityElement = document.createElement('div');
+                activityElement.className = 'activity-item';
+                activityElement.innerHTML = `
+                    <div class="activity-icon ${activity.type}">
+                        ${activity.icon}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-description">${activity.description}</div>
+                        <div class="activity-time">${time}</div>
+                    </div>
+                `;
+                
+                feed.insertBefore(activityElement, feed.firstChild);
+                
+                // Remove old activities if too many
+                while (feed.children.length > 10) {
+                    feed.removeChild(feed.lastChild);
+                }
+                
+                activityIndex++;
+            }
+            
+            // Add initial activities
+            for (let i = 0; i < 5; i++) {
+                addActivity();
+            }
+            
+            // Add new activity every 3 seconds
+            setInterval(addActivity, 3000);
+        }
+
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill[data-width]');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const bar = entry.target;
+                        const targetWidth = bar.getAttribute('data-width');
+                        setTimeout(() => {
+                            bar.style.width = targetWidth;
+                        }, 200);
+                        observer.unobserve(bar);
+                    }
+                });
+            });
+            
+            progressBars.forEach(bar => observer.observe(bar));
+        }
+
+        function updateMetrics() {
+            // Simulate real-time metric updates
+            setInterval(() => {
+                const charts = document.querySelectorAll('.chart-bar');
+                charts.forEach(bar => {
+                    const currentHeight = parseInt(bar.style.height);
+                    const change = (Math.random() - 0.5) * 20;
+                    const newHeight = Math.max(10, Math.min(80, currentHeight + change));
+                    bar.style.height = newHeight + '%';
+                });
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

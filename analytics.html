@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Analytics - AegisCore Security Framework</title>
+    <link rel="stylesheet" href="assets/style.css">
+    <style>
+        /* Analytics Specific Styles */
+        .analytics-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .analytics-hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a0a 100%);
+            padding: 80px 0;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .analytics-hero h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .analytics-hero p {
+            font-size: 1.2rem;
+            color: #b0b0b0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .user-counter-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .user-counter {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 800;
+            color: #00d4ff;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            margin-bottom: 1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .user-counter-label {
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 2rem;
+        }
+
+        .growth-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .growth-stat {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .growth-stat:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00ff88;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .analytics-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .analytics-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 250px;
+            gap: 1rem;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #00d4ff, #0099cc);
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+            transform: translateY(-5px);
+        }
+
+        .chart-bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #b0b0b0;
+            white-space: nowrap;
+        }
+
+        .chart-bar-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .activity-feed {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.join {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+        }
+
+        .activity-icon.active {
+            background: rgba(0, 212, 255, 0.2);
+            color: #00d4ff;
+        }
+
+        .activity-icon.churn {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-description {
+            font-size: 0.9rem;
+            color: #b0b0b0;
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .geographic-map {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-point {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #00d4ff;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+
+        .map-point:hover {
+            transform: scale(1.5);
+            background: #00ff88;
+        }
+
+        .map-point.large {
+            width: 20px;
+            height: 20px;
+            background: #00ff88;
+        }
+
+        .map-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .map-point:hover + .map-tooltip {
+            opacity: 1;
+        }
+
+        .retention-chart {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 200px;
+            margin-bottom: 2rem;
+        }
+
+        .retention-segment {
+            flex: 1;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            margin: 0 2px;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .retention-segment:hover {
+            transform: scaleY(1.1);
+        }
+
+        .retention-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: #b0b0b0;
+        }
+
+        .demographic-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .demographic-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .demographic-label {
+            min-width: 100px;
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .demographic-bar {
+            flex: 1;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .demographic-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #00ff88);
+            border-radius: 15px;
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+        }
+
+        .demographic-value {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .projection-calculator {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .calculator-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .input-group label {
+            color: #b0b0b0;
+            font-size: 0.9rem;
+        }
+
+        .input-group input {
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        .projection-result {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 12px;
+        }
+
+        .projection-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 0.5rem;
+        }
+
+        .projection-label {
+            color: #b0b0b0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.2); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .growth-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .calculator-inputs {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">AegisCore</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="policies.html" class="nav-link">Policies</a></li>
+                <li><a href="download.html" class="nav-link">Download</a></li>
+                <li><a href="analytics.html" class="nav-link active">Analytics</a></li>
+                <li><a href="checklist.html" class="nav-link">Checklist</a></li>
+                <li><a href="demo.html" class="nav-link">Demo</a></li>
+                <li><a href="simulation.html" class="nav-link">Simulation</a></li>
+                <li><a href="comparison.html" class="nav-link">Compare</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="legal.html" class="nav-link">Legal</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="analytics-hero">
+            <div class="analytics-container">
+                <h1>User Analytics Dashboard</h1>
+                <p>Real-time insights into AegisCore user growth and engagement</p>
+            </div>
+        </section>
+
+        <section class="user-counter">
+            <div class="analytics-container">
+                <div class="user-counter-section fade-in">
+                    <div class="user-counter" id="userCounter">0</div>
+                    <div class="user-counter-label">Active Users Worldwide</div>
+                    
+                    <div class="growth-stats">
+                        <div class="growth-stat">
+                            <div class="stat-value" id="weeklyGrowth">+3,000</div>
+                            <div class="stat-label">Weekly Growth</div>
+                        </div>
+                        <div class="growth-stat">
+                            <div class="stat-value" id="monthlyGrowth">+12,000</div>
+                            <div class="stat-label">Monthly Growth</div>
+                        </div>
+                        <div class="growth-stat">
+                            <div class="stat-value" id="yearlyGrowth">+156,000</div>
+                            <div class="stat-label">Yearly Projection</div>
+                        </div>
+                        <div class="growth-stat">
+                            <div class="stat-value" id="retentionRate">94%</div>
+                            <div class="stat-label">Retention Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="analytics-metrics">
+            <div class="analytics-container">
+                <div class="analytics-grid">
+                    <div class="analytics-card fade-in">
+                        <div class="card-header">
+                            <div class="card-icon">📈</div>
+                            <h3 class="card-title">User Growth</h3>
+                        </div>
+                        <div class="chart-container">
+                            <div class="chart-bars" id="growthChart">
+                                <!-- Chart bars will be generated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card fade-in">
+                        <div class="card-header">
+                            <div class="card-icon">🌍</div>
+                            <h3 class="card-title">Geographic Distribution</h3>
+                        </div>
+                        <div class="geographic-map" id="worldMap">
+                            <!-- Map points will be generated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="analytics-card fade-in">
+                        <div class="card-header">
+                            <div class="card-icon">👥</div>
+                            <h3 class="card-title">User Demographics</h3>
+                        </div>
+                        <div class="demographic-bars">
+                            <div class="demographic-item">
+                                <div class="demographic-label">Enterprise</div>
+                                <div class="demographic-bar">
+                                    <div class="demographic-fill" style="width: 45%">
+                                        <span class="demographic-value">45%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="demographic-item">
+                                <div class="demographic-label">Small Business</div>
+                                <div class="demographic-bar">
+                                    <div class="demographic-fill" style="width: 30%">
+                                        <span class="demographic-value">30%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="demographic-item">
+                                <div class="demographic-label">Personal</div>
+                                <div class="demographic-bar">
+                                    <div class="demographic-fill" style="width: 15%">
+                                        <span class="demographic-value">15%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="demographic-item">
+                                <div class="demographic-label">Education</div>
+                                <div class="demographic-bar">
+                                    <div class="demographic-fill" style="width: 10%">
+                                        <span class="demographic-value">10%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analytics-card fade-in">
+                        <div class="card-header">
+                            <div class="card-icon">🔄</div>
+                            <h3 class="card-title">User Retention</h3>
+                        </div>
+                        <div class="retention-chart" id="retentionChart">
+                            <!-- Retention segments will be generated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="analytics-card fade-in">
+                        <div class="card-header">
+                            <div class="card-icon">⚡</div>
+                            <h3 class="card-title">Live Activity Feed</h3>
+                        </div>
+                        <div class="activity-feed" id="activityFeed">
+                            <!-- Activity items will be generated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="analytics-card fade-in">
+                        <div class="card-header">
+                            <div class="card-icon">🔮</div>
+                            <h3 class="card-title">Growth Projection</h3>
+                        </div>
+                        <div class="projection-calculator">
+                            <div class="calculator-inputs">
+                                <div class="input-group">
+                                    <label for="currentUsers">Current Users</label>
+                                    <input type="number" id="currentUsers" value="50000" readonly>
+                                </div>
+                                <div class="input-group">
+                                    <label for="weeklyRate">Weekly Growth Rate</label>
+                                    <input type="number" id="weeklyRate" value="3000" readonly>
+                                </div>
+                                <div class="input-group">
+                                    <label for="projectionWeeks">Weeks to Project</label>
+                                    <input type="number" id="projectionWeeks" value="12" min="1" max="52">
+                                </div>
+                            </div>
+                            <div class="projection-result">
+                                <div class="projection-value" id="projectionResult">86,000</div>
+                                <div class="projection-label">Projected Users in 12 Weeks</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AegisCore Security Framework. Research & Educational Use.</p>
+        </div>
+    </footer>
+
+    <script src="assets/app.js"></script>
+    <script>
+        // Analytics JavaScript
+        let userCount = 50000;
+        let weeklyGrowthRate = 3000;
+        let growthInterval;
+
+        function initializeAnalytics() {
+            startUserCounter();
+            generateGrowthChart();
+            generateWorldMap();
+            generateRetentionChart();
+            startActivityFeed();
+            initializeProjectionCalculator();
+        }
+
+        function startUserCounter() {
+            const counter = document.getElementById('userCounter');
+            const startTime = Date.now();
+            const startCount = userCount;
+            
+            // Calculate users based on weeks since launch (simulated)
+            const weeksSinceLaunch = Math.floor((Date.now() - new Date('2024-01-01').getTime()) / (7 * 24 * 60 * 60 * 1000));
+            userCount = startCount + (weeksSinceLaunch * weeklyGrowthRate);
+            
+            // Animate counter
+            let currentCount = startCount;
+            const targetCount = userCount;
+            const increment = (targetCount - startCount) / 100;
+            
+            const updateCounter = () => {
+                currentCount += increment;
+                if (currentCount < targetCount) {
+                    counter.textContent = Math.floor(currentCount).toLocaleString();
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = targetCount.toLocaleString();
+                }
+            };
+            
+            updateCounter();
+            
+            // Simulate real-time growth
+            growthInterval = setInterval(() => {
+                userCount += Math.floor(Math.random() * 10) + 1;
+                counter.textContent = userCount.toLocaleString();
+                updateGrowthStats();
+            }, 5000);
+        }
+
+        function updateGrowthStats() {
+            const weeklyGrowth = document.getElementById('weeklyGrowth');
+            const monthlyGrowth = document.getElementById('monthlyGrowth');
+            const yearlyGrowth = document.getElementById('yearlyGrowth');
+            
+            weeklyGrowth.textContent = `+${weeklyGrowthRate.toLocaleString()}`;
+            monthlyGrowth.textContent = `+${(weeklyGrowthRate * 4).toLocaleString()}`;
+            yearlyGrowth.textContent = `+${(weeklyGrowthRate * 52).toLocaleString()}`;
+        }
+
+        function generateGrowthChart() {
+            const chartContainer = document.getElementById('growthChart');
+            const weeks = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6'];
+            const values = [45000, 48000, 51000, 54000, 57000, userCount];
+            
+            chartContainer.innerHTML = '';
+            
+            weeks.forEach((week, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${(values[index] / Math.max(...values)) * 100}%`;
+                
+                const label = document.createElement('div');
+                label.className = 'chart-bar-label';
+                label.textContent = week;
+                bar.appendChild(label);
+                
+                const value = document.createElement('div');
+                value.className = 'chart-bar-value';
+                value.textContent = values[index].toLocaleString();
+                bar.appendChild(value);
+                
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        function generateWorldMap() {
+            const mapContainer = document.getElementById('worldMap');
+            const locations = [
+                { name: 'United States', users: 15000, x: 25, y: 35, size: 'large' },
+                { name: 'Germany', users: 8000, x: 48, y: 30, size: 'medium' },
+                { name: 'United Kingdom', users: 6000, x: 47, y: 28, size: 'medium' },
+                { name: 'Japan', users: 5000, x: 85, y: 35, size: 'medium' },
+                { name: 'Australia', users: 3000, x: 80, y: 70, size: 'small' },
+                { name: 'Canada', users: 4000, x: 25, y: 25, size: 'small' },
+                { name: 'Brazil', users: 3500, x: 35, y: 65, size: 'small' },
+                { name: 'India', users: 4500, x: 70, y: 45, size: 'small' }
+            ];
+            
+            locations.forEach(location => {
+                const point = document.createElement('div');
+                point.className = `map-point ${location.size}`;
+                point.style.left = location.x + '%';
+                point.style.top = location.y + '%';
+                
+                const tooltip = document.createElement('div');
+                tooltip.className = 'map-tooltip';
+                tooltip.textContent = `${location.name}: ${location.users.toLocaleString()} users`;
+                tooltip.style.left = location.x + '%';
+                tooltip.style.top = (location.y - 5) + '%';
+                
+                mapContainer.appendChild(point);
+                mapContainer.appendChild(tooltip);
+            });
+        }
+
+        function generateRetentionChart() {
+            const chartContainer = document.getElementById('retentionChart');
+            const periods = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 8', 'Week 12'];
+            const rates = [100, 95, 92, 89, 85, 82];
+            
+            chartContainer.innerHTML = '';
+            
+            periods.forEach((period, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'retention-segment';
+                segment.style.width = rates[index] + '%';
+                
+                const label = document.createElement('div');
+                label.className = 'retention-label';
+                label.textContent = period;
+                segment.appendChild(label);
+                
+                chartContainer.appendChild(segment);
+            });
+        }
+
+        function startActivityFeed() {
+            const feedContainer = document.getElementById('activityFeed');
+            const activities = [
+                { type: 'join', title: 'New User Registration', description: 'Enterprise user from United States', time: 'Just now' },
+                { type: 'active', title: 'Security Scan Completed', description: 'User from Germany completed system scan', time: '2 minutes ago' },
+                { type: 'join', title: 'New User Registration', description: 'Small business from United Kingdom', time: '5 minutes ago' },
+                { type: 'active', title: 'Policy Updated', description: 'User from Japan updated security policies', time: '8 minutes ago' },
+                { type: 'churn', title: 'User Churned', description: 'Personal user account deactivated', time: '15 minutes ago' },
+                { type: 'active', title: 'Threat Blocked', description: 'AegisCore blocked malware for user in Canada', time: '20 minutes ago' }
+            ];
+            
+            function addActivity() {
+                const activity = activities[Math.floor(Math.random() * activities.length)];
+                const item = document.createElement('div');
+                item.className = 'activity-item';
+                item.innerHTML = `
+                    <div class="activity-icon ${activity.type}">
+                        ${activity.type === 'join' ? '👤' : activity.type === 'active' ? '⚡' : '📤'}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-description">${activity.description}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                `;
+                
+                feedContainer.insertBefore(item, feedContainer.firstChild);
+                
+                // Keep only latest 10 activities
+                while (feedContainer.children.length > 10) {
+                    feedContainer.removeChild(feedContainer.lastChild);
+                }
+            }
+            
+            // Add initial activities
+            for (let i = 0; i < 5; i++) {
+                addActivity();
+            }
+            
+            // Add new activity every 10 seconds
+            setInterval(addActivity, 10000);
+        }
+
+        function initializeProjectionCalculator() {
+            const weeksInput = document.getElementById('projectionWeeks');
+            const resultElement = document.getElementById('projectionResult');
+            
+            function updateProjection() {
+                const weeks = parseInt(weeksInput.value) || 12;
+                const projectedUsers = userCount + (weeks * weeklyGrowthRate);
+                resultElement.textContent = projectedUsers.toLocaleString();
+                
+                // Update label
+                resultElement.nextElementSibling.textContent = `Projected Users in ${weeks} Week${weeks > 1 ? 's' : ''}`;
+            }
+            
+            weeksInput.addEventListener('input', updateProjection);
+            updateProjection();
+        }
+
+        // Initialize analytics on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAnalytics();
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (growthInterval) {
+                clearInterval(growthInterval);
+            }
+        });
+    </script>
+</body>
+</html>
